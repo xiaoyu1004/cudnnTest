@@ -1,7 +1,7 @@
 #include "reduce/reduce.h"
 #include "common.h"
 
-#define ENABLE_PRINT 1
+#define ENABLE_PRINT 0
 
 #if ENABLE_PRINT
 #define PRINT_TENSOR(device, ptr, flag)                                                                                                    \
@@ -45,15 +45,15 @@ void ReduceMax5DTest()
     // unsigned int input_w1 = 1;
 
     unsigned int input_n0 = 1;
-    unsigned int input_c0 = 2;
-    unsigned int input_d0 = 2;
-    unsigned int input_h0 = 4;
-    unsigned int input_w0 = 4;
+    unsigned int input_c0 = 2704;
+    unsigned int input_d0 = 44;
+    unsigned int input_h0 = 2704;
+    unsigned int input_w0 = 44;
 
     unsigned int input_n1 = 1;
-    unsigned int input_c1 = 2;
-    unsigned int input_d1 = 2;
-    unsigned int input_h1 = 4;
+    unsigned int input_c1 = 2704;
+    unsigned int input_d1 = 44;
+    unsigned int input_h1 = 2704;
     unsigned int input_w1 = 1;
 
     unsigned int aSize = input_n0 * input_c0 * input_d0 * input_h0 * input_w0;

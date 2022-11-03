@@ -3,7 +3,7 @@ project(cudnnTest)
 enable_language(CUDA)
 set(CMAKE_CUDA_ARCHITECTURES 86)
 
-option(ENABLE_CUDNN "" OFF)
+option(ENABLE_CUDNN "" ON)
 if(ENABLE_CUDNN)
     add_definitions(-DENABLE_CUDNN)
 endif()
