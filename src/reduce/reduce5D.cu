@@ -291,23 +291,16 @@ void reduceMax5D(unsigned int dim_n,
                  const T *A,
                  T *C)
 {
-    // {
-    //     dim3 dimBlock(kNbThreadsPerBlockReduce, 1, 1);
-    //     dim3 dimGrid(dim_h, dim_n * dim_c, dim_d);
-    //     ReductionMax5D<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, dim_w, A, C);
-    // }
-
     {
         dim3 dimBlock(kNbThreadsPerBlockReduce, 1, 1);
         dim3 dimGrid(dim_n * dim_c * dim_d * dim_h, 1, 1);
-        // reduceMax5DW<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, dim_w, A, workspace);
-        reduceMax5DW<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, dim_w, A, C);
+        reduceMax5DW<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, dim_w, A, workspace);
     }
-    // {
-    //     dim3 dimBlock(kNbThreadsPerBlockReduce, 1, 1);
-    //     dim3 dimGrid(dim_h, dim_c, dim_n);
-    //     reduceMax5DD<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, 1, workspace, C);
-    // }
+    {
+        dim3 dimBlock(kNbThreadsPerBlockReduce, 1, 1);
+        dim3 dimGrid(dim_h, dim_c, dim_n);
+        reduceMax5DD<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, 1, workspace, C);
+    }
     CUDA_CHECK(cudaDeviceSynchronize());
     CUDA_POST_KERNEL_CHECK;
 }
