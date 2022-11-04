@@ -2,7 +2,9 @@
 #define COMMON_H
 
 #include <cuda_runtime.h>
+#ifdef ENABLE_CUDNN
 #include <cudnn.h>
+#endif
 
 #include <iostream>
 

@@ -111,10 +111,7 @@ void __global__ reduceMax5DW(unsigned int dim_n,
     unsigned int tid = threadIdx.x;
 
     unsigned int bx = blockIdx.x;
-    unsigned int by = blockIdx.y;
-    unsigned int bz = blockIdx.z;
-
-    unsigned int base_idx = bz * dim_d * dim_h * dim_w + by * dim_h * dim_w + bx * dim_w;
+    unsigned int base_idx = bx * dim_w;
 
     __shared__ T sdata[kNbThreadsPerBlockReduce];
 
@@ -150,7 +147,7 @@ void __global__ reduceMax5DW(unsigned int dim_n,
         offset += kNbThreadsPerBlockReduce;
     }
 
-    unsigned int c_idx = bz * dim_d * dim_h + by * dim_h + bx;
+    unsigned int c_idx = bx;
     if (tid == 0)
     {
         C[c_idx] = max;
@@ -256,7 +253,7 @@ void __global__ reduceMax5DD(unsigned int dim_n,
     __syncthreads();
     max = sdata[0];
 
-    unsigned int loopCnt = (dim_w + kNbThreadsPerBlockReduce - 1) / kNbThreadsPerBlockReduce;
+    unsigned int loopCnt = (dim_d + kNbThreadsPerBlockReduce - 1) / kNbThreadsPerBlockReduce;
     for (unsigned int i = 0; i < loopCnt; ++i)
     {
         unsigned int offset = i * kNbThreadsPerBlockReduce + tid;
@@ -294,17 +291,18 @@ void reduceMax5D(unsigned int dim_n,
                  const T *A,
                  T *C)
 {
-    {
-        dim3 dimBlock(kNbThreadsPerBlockReduce, 1, 1);
-        dim3 dimGrid(dim_h, dim_n * dim_c, dim_d);
-        ReductionMax5D<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, dim_w, A, C);
-    }
-
     // {
     //     dim3 dimBlock(kNbThreadsPerBlockReduce, 1, 1);
-    //     dim3 dimGrid(dim_n * dim_c * dim_d * dim_h, 1, 1);
-    //     reduceMax5DW<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, dim_w, A, workspace);
+    //     dim3 dimGrid(dim_h, dim_n * dim_c, dim_d);
+    //     ReductionMax5D<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, dim_w, A, C);
     // }
+
+    {
+        dim3 dimBlock(kNbThreadsPerBlockReduce, 1, 1);
+        dim3 dimGrid(dim_n * dim_c * dim_d * dim_h, 1, 1);
+        // reduceMax5DW<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, dim_w, A, workspace);
+        reduceMax5DW<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, dim_w, A, C);
+    }
     // {
     //     dim3 dimBlock(kNbThreadsPerBlockReduce, 1, 1);
     //     dim3 dimGrid(dim_h, dim_c, dim_n);
