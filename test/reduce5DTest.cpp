@@ -45,22 +45,22 @@ void ReduceMax5DTest()
     // unsigned int input_w1 = 1;
 
     unsigned int input_n0 = 1;
-    unsigned int input_c0 = 2704;
+    unsigned int input_c0 = 512;
     unsigned int input_d0 = 44;
-    unsigned int input_h0 = 2704;
+    unsigned int input_h0 = 512;
     unsigned int input_w0 = 44;
 
     unsigned int input_n1 = 1;
-    unsigned int input_c1 = 2704;
-    unsigned int input_d1 = 44;
-    unsigned int input_h1 = 2704;
+    unsigned int input_c1 = 512;
+    unsigned int input_d1 = 1;
+    unsigned int input_h1 = 512;
     unsigned int input_w1 = 1;
 
     unsigned int aSize = input_n0 * input_c0 * input_d0 * input_h0 * input_w0;
     float *h_a = new float[aSize]{0.f};
     for (unsigned int i = 0; i < aSize; ++i)
     {
-        h_a[i] = i % 9999;
+        h_a[i] = i % 44;
     }
 
     unsigned int cSize = input_n1 * input_c1 * input_d1 * input_h1 * input_w1;
@@ -119,6 +119,7 @@ void ReduceMax5DTest()
     size_t workspaceSizeInBytes;
     CUDNN_CHECK(cudnnGetReductionWorkspaceSize(handle, reduceTensorDesc, aDesc, cDesc, &workspaceSizeInBytes));
     CUDA_CHECK(cudaMalloc(&workspace, workspaceSizeInBytes));
+    CUDA_CHECK(cudaMemset(workspace, 0, workspaceSizeInBytes));
 
     float alpha = 1.f;
     float beta = 0.f;

@@ -144,7 +144,6 @@ void __global__ reduceMax5DW(unsigned int dim_n,
         {
             max = max_now;
         }
-        offset += kNbThreadsPerBlockReduce;
     }
 
     unsigned int c_idx = bx;
@@ -155,73 +154,6 @@ void __global__ reduceMax5DW(unsigned int dim_n,
 }
 
 #define Ceil(v, b) ((((v) + (b)-1) / (b)))
-
-///////////////////////////////////////////////
-template <typename T>
-__global__ void ReductionMax5D(int dim_n,
-                               int dim_c,
-                               int dim_d,
-                               int dim_h,
-                               int dim_w,
-                               const T *A,
-                               T *C)
-{
-
-    int spatial_idx = threadIdx.x;
-    const int tid = threadIdx.x;
-
-    int w_id = spatial_idx;
-
-    const int h_id = blockIdx.x;
-    const int d_id = blockIdx.z;
-    const int c_id = blockIdx.y % dim_c;
-    const int n_id = blockIdx.y / dim_c;
-
-    const int dim_hw = dim_w * dim_h;
-    const int dim_dhw = dim_w * dim_h * dim_d;
-    const int dim_cdhw = dim_w * dim_h * dim_d * dim_c;
-
-    const int total_loop_cnt = Ceil(dim_w, blockDim.x);
-
-    int base_idx = n_id * dim_cdhw + c_id * dim_dhw + d_id * dim_hw + h_id * dim_w;
-    float max = A[base_idx];
-
-    __shared__ float sdata[kNbThreadsPerBlockReduce];
-    sdata[threadIdx.x] = max; // important
-    __syncthreads();
-
-    for (int k = 0; k < total_loop_cnt; k++)
-    {
-        int xid = base_idx + w_id;
-        if (w_id < dim_w)
-        {
-            sdata[tid] = A[xid];
-        }
-        else
-        {
-            sdata[tid] = max;
-        }
-        __syncthreads();
-        ReductionMax<float>(threadIdx.x, sdata, blockDim.x);
-        __syncthreads();
-        const float max_now = sdata[0];
-        if (max_now > max)
-        {
-            max = max_now;
-        }
-        __syncthreads();
-        w_id += blockDim.x;
-    }
-
-    __syncthreads();
-
-    int c_index = n_id * dim_c * dim_d * dim_h + c_id * dim_d * dim_h + d_id * dim_h + h_id;
-    if (threadIdx.x == 0)
-    {
-        C[c_index] = max;
-    }
-}
-///////////////////////////////////////////////
 
 template <typename T>
 void __global__ reduceMax5DD(unsigned int dim_n,
@@ -271,7 +203,6 @@ void __global__ reduceMax5DD(unsigned int dim_n,
         {
             max = max_now;
         }
-        offset += kNbThreadsPerBlockReduce;
     }
 
     unsigned int c_idx = bz * dim_c * dim_h + by * dim_h + bx;
@@ -295,6 +226,7 @@ void reduceMax5D(unsigned int dim_n,
         dim3 dimBlock(kNbThreadsPerBlockReduce, 1, 1);
         dim3 dimGrid(dim_n * dim_c * dim_d * dim_h, 1, 1);
         reduceMax5DW<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, dim_w, A, workspace);
+        // reduceMax5DW<T><<<dimGrid, dimBlock>>>(dim_n, dim_c, dim_d, dim_h, dim_w, A, C);
     }
     {
         dim3 dimBlock(kNbThreadsPerBlockReduce, 1, 1);
