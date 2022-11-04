@@ -45,15 +45,15 @@ void ReduceMax5DTest()
     // unsigned int input_w1 = 1;
 
     unsigned int input_n0 = 1;
-    unsigned int input_c0 = 512;
+    unsigned int input_c0 = 2704;
     unsigned int input_d0 = 44;
-    unsigned int input_h0 = 512;
+    unsigned int input_h0 = 2704;
     unsigned int input_w0 = 44;
 
     unsigned int input_n1 = 1;
-    unsigned int input_c1 = 512;
+    unsigned int input_c1 = 2704;
     unsigned int input_d1 = 1;
-    unsigned int input_h1 = 512;
+    unsigned int input_h1 = 2704;
     unsigned int input_w1 = 1;
 
     unsigned int aSize = input_n0 * input_c0 * input_d0 * input_h0 * input_w0;
@@ -119,7 +119,7 @@ void ReduceMax5DTest()
     size_t workspaceSizeInBytes;
     CUDNN_CHECK(cudnnGetReductionWorkspaceSize(handle, reduceTensorDesc, aDesc, cDesc, &workspaceSizeInBytes));
     CUDA_CHECK(cudaMalloc(&workspace, workspaceSizeInBytes));
-    CUDA_CHECK(cudaMemset(workspace, 0, workspaceSizeInBytes));
+    // CUDA_CHECK(cudaMemset(workspace, 0, workspaceSizeInBytes));
 
     float alpha = 1.f;
     float beta = 0.f;
@@ -133,14 +133,16 @@ void ReduceMax5DTest()
 
     for (unsigned int i = 0; i < cSize; ++i)
     {
-        float err = std::abs(h_dnn_c[i] - h_c[i]);
-        if (err > 1e-3)
-        {
-            std::cout << "ERROR! h_dnn_c[" << i << "]=" << h_dnn_c[i] << " vs h_c[" << i << "]=" << h_c[i] << std::endl;
-            std::terminate();
-        }
+        // float err = std::abs(h_dnn_c[i] - h_c[i]);
+        // if (err > 1e-3)
+        // {
+        //     std::cout << "ERROR! h_dnn_c[" << i << "]=" << h_dnn_c[i] << " vs h_c[" << i << "]=" << h_c[i] << std::endl;
+        //     std::terminate();
+        // }
+        // std::cout << "h_dnn_c[" << i << "] = " << h_dnn_c[i] << std::endl;
+        std::cout << "h_dnn_c[" << i << "] = " << h_dnn_c[i] << std::endl;
     }
-    std::cout << "compare pass!" << std::endl;
+    // std::cout << "compare pass!" << std::endl;
 #endif
 
     // free
